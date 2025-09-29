@@ -5,10 +5,21 @@ from scipy.ndimage import distance_transform_edt as dtedt
 from skimage.filters import threshold_otsu
 from tqdm import tqdm
 
-from cellulus.configs.inference_config import InferenceConfig
-from cellulus.datasets.meta_data import DatasetMetaData
-from cellulus.utils.misc import size_filter
+from cellulus_track.configs.inference_config import InferenceConfig
+from cellulus_track.datasets.meta_data import DatasetMetaData
+from cellulus_track.utils.misc import size_filter
 
+def threshold_first_local_min(data):
+    data = np.histogram(data[~np.isnan(data)].ravel(), bins = 1000)
+    kernel_size = 20
+    kernel = np.ones(kernel_size) / kernel_size
+    data_smoothed = np.convolve(data[0], kernel, mode='same')
+    data_prime = np.diff(data_smoothed)
+    turningpoints = np.where(np.diff(np.sign(data_prime)))[0]
+    firstminimum = turningpoints[np.where(np.diff(data_prime)[turningpoints]>0)[0][0]]
+    threshold = data[1][firstminimum]
+
+    return threshold
 
 def segment(inference_config: InferenceConfig) -> None:
     # filter small objects, erosion, etc.
@@ -78,7 +89,8 @@ def segment(inference_config: InferenceConfig) -> None:
                             np.max(x),
                         )
                     raw_image_masked = raw_image[segmentation_id_mask]
-                    threshold = threshold_otsu(raw_image_masked)
+                    # threshold = threshold_otsu(raw_image_masked)
+                    threshold = threshold_first_local_min(raw_image_masked)
                     mask = segmentation_id_mask & (raw_image > threshold)
 
                     if dataset_meta_data.num_spatial_dims == 2:

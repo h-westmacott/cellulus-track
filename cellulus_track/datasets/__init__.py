@@ -1,8 +1,8 @@
 from typing import Tuple
 
-from cellulus.configs import DatasetConfig
-from cellulus.datasets.meta_data import DatasetMetaData  # noqa
-from cellulus.datasets.zarr_dataset import ZarrDataset
+from cellulus_track.configs import DatasetConfig
+from cellulus_track.datasets.meta_data import DatasetMetaData  # noqa
+from cellulus_track.datasets.zarr_dataset import ZarrDataset
 
 
 def get_dataset(

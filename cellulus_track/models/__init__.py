@@ -1,6 +1,6 @@
 from typing import List, Tuple
 
-from cellulus.models.unet import UNetModel
+from cellulus_track.models.unet import UNetModel
 
 
 def get_model(
@@ -11,6 +11,7 @@ def get_model(
     features_in_last_layer: int,
     downsampling_factors: List[Tuple[int, ...]],
     num_spatial_dims: int,
+    num_heads: int
 ) -> UNetModel:
     return UNetModel(
         in_channels=in_channels,
@@ -20,4 +21,5 @@ def get_model(
         features_in_last_layer=features_in_last_layer,
         downsampling_factors=downsampling_factors,
         num_spatial_dims=num_spatial_dims,
+        num_heads=num_heads,
     )

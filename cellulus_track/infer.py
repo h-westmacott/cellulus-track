@@ -3,12 +3,12 @@ import os
 import numpy as np
 import torch
 
-from cellulus.datasets.meta_data import DatasetMetaData
-from cellulus.detect import detect
-from cellulus.evaluate import evaluate
-from cellulus.models import get_model
-from cellulus.predict import predict
-from cellulus.segment import segment
+from cellulus_track.datasets.meta_data import DatasetMetaData
+from cellulus_track.detect import detect
+from cellulus_track.evaluate import evaluate
+from cellulus_track.models import get_model
+from cellulus_track.predict import predict
+from cellulus_track.segment import segment
 
 torch.backends.cudnn.benchmark = True
 

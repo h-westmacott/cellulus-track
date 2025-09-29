@@ -5,7 +5,7 @@ import gunpowder as gp
 import numpy as np
 from torch.utils.data import IterableDataset
 
-from cellulus.configs import DatasetConfig
+from cellulus_track.configs import DatasetConfig
 
 from .meta_data import DatasetMetaData
 
@@ -21,6 +21,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         density: float,
         kappa: float,
         normalization_factor: float,
+        anisotropy: float = 1.0,
     ):
         """A dataset that serves random samples from a zarr container.
 
@@ -82,6 +83,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
         self.control_point_spacing = control_point_spacing
         self.control_point_jitter = control_point_jitter
         self.normalization_factor = normalization_factor
+        self.p_translation = 0.0
         self.__read_meta_data()
 
         assert len(crop_size) == self.num_spatial_dims, (
@@ -91,15 +93,24 @@ class ZarrDataset(IterableDataset):  # type: ignore
         )
         self.density = density
         self.kappa = kappa
-        self.output_shape = tuple(int(_ - 16) for _ in self.crop_size)
+        self.output_shape = tuple(int(_ - 24) for _ in self.crop_size)
         self.normalization_factor = normalization_factor
         self.unbiased_shape = tuple(
             int(_ - (2 * self.kappa)) for _ in self.output_shape
         )
+        self.anisotropy = anisotropy
         self.__setup_pipeline()
 
+    def __iter_old__(self):
+        if np.random.rand() <= self.p_translation:
+            return iter(self.__yield_translated_sample())
+        else:
+            return iter(self.__yield_sample())
+        
     def __iter__(self):
-        return iter(self.__yield_sample())
+        # return iter(self.__yield_random_sample())
+        return iter(self.__yield_expanded_sample())
+        
 
     def __setup_pipeline(self):
         self.raw = gp.ArrayKey("RAW")
@@ -134,7 +145,7 @@ class ZarrDataset(IterableDataset):  # type: ignore
 
     def __yield_sample(self):
         """An infinite generator of crops."""
-
+        # print('request shape =',(2, self.num_channels, *self.crop_size))
         with gp.build(self.pipeline):
             while True:
                 array_is_zero = True
@@ -144,18 +155,149 @@ class ZarrDataset(IterableDataset):  # type: ignore
                     request[self.raw] = gp.ArraySpec(
                         roi=gp.Roi(
                             (0,) * self.num_dims,
-                            (1, self.num_channels, *self.crop_size),
+                            # (1, self.num_channels, *self.crop_size),
+                            (2, self.num_channels, *self.crop_size),
                         )
                     )
 
                     sample = self.pipeline.request_batch(request)
-                    sample_data = sample[self.raw].data[0]
+                    sample_data = sample[self.raw].data
                     if np.max(sample_data) <= 0.0:
                         pass
                     else:
                         array_is_zero = False
                         anchor_samples, reference_samples = self.sample_coordinates()
                 yield sample_data, anchor_samples, reference_samples
+
+    def __yield_expanded_sample(self):
+        """An infinite generator of crops."""
+        # print('request shape =',(2, self.num_channels, *self.crop_size))
+        expansion_size = self.anisotropy
+        if len(self.crop_size) == 3:
+            # self.temp_crop_size = self.crop_size[:2] + (int(1/expansion_size * self.crop_size[2],),)
+            self.temp_crop_size = (int(1/expansion_size * self.crop_size[2],),) + self.crop_size[1:]
+        with gp.build(self.pipeline):
+            while True:
+                array_is_zero = True
+                # request one sample, all channels, plus crop dimensions
+                while array_is_zero:
+                    request = gp.BatchRequest()
+                    request[self.raw] = gp.ArraySpec(
+                        roi=gp.Roi(
+                            (0,) * self.num_dims,
+                            # (1, self.num_channels, *self.crop_size),
+                            # (2, self.num_channels, *self.crop_size),
+                            (2, self.num_channels, *self.temp_crop_size),
+                        )
+                    )
+
+                    sample = self.pipeline.request_batch(request)
+                    sample_data = sample[self.raw].data
+                    if len(self.crop_size) == 3:
+                        # sample_data = np.repeat(sample_data, expansion_size, axis=4)
+                        sample_data = np.repeat(sample_data, expansion_size, axis=2)
+                    if np.max(sample_data) <= 0.0:
+                        pass
+                    else:
+                        array_is_zero = False
+                        anchor_samples, reference_samples = self.sample_coordinates()
+                yield sample_data, anchor_samples, reference_samples, np.array((0,0))
+
+    def __yield_translated_sample(self):
+        """An infinite generator of crops."""
+        pad_size = 5
+        self.temp_crop_size = tuple(_ + (2*pad_size) for _ in self.crop_size)
+        # print('request shape =',(1, self.num_channels, *self.temp_crop_size))
+        with gp.build(self.pipeline):
+            while True:
+                array_is_zero = True
+                # request one sample, all channels, plus crop dimensions
+                while array_is_zero:
+                    request = gp.BatchRequest()
+                    request[self.raw] = gp.ArraySpec(
+                        roi=gp.Roi(
+                            (0,) * self.num_dims,
+                            # (1, self.num_channels, *self.crop_size),
+                            (1, self.num_channels, *self.temp_crop_size),
+                        )
+                    )
+
+                    sample = self.pipeline.request_batch(request)
+                    sample_data = sample[self.raw].data
+                    if np.max(sample_data) <= 0.0:
+                        pass
+                    else:
+                        array_is_zero = False
+                        anchor_samples, reference_samples = self.sample_coordinates()
+                        # Repeat and translate the sample
+                        # gotta request a larger region, so that it can be translated and cropped
+                        # sample_data = np.repeat(sample_data, 2, axis=2)
+                        translation = (np.random.randint(-pad_size, pad_size),
+                                       np.random.randint(-pad_size, pad_size))
+                        translated_sample_data = sample_data[:,
+                                                             :,
+                                                             pad_size+translation[0]:pad_size+self.crop_size[0]+translation[0],
+                                                             pad_size+translation[1]:pad_size+self.crop_size[1]+translation[1]]
+                        cropped_sample_data = sample_data[:,
+                                                          :,
+                                                          pad_size:pad_size+self.crop_size[0],
+                                                          pad_size:pad_size+self.crop_size[1]]
+                        sample_data = np.concatenate((cropped_sample_data, translated_sample_data), axis=0)
+                        # implement this translation as a crop
+
+                yield sample_data, anchor_samples, reference_samples, translation
+
+    def __yield_random_sample(self):
+        """An infinite generator of crops."""
+        pad_size = 3
+        self.temp_crop_size = tuple(_ + (2*pad_size) for _ in self.crop_size)
+        # print('request shape =',(2, self.num_channels, *self.temp_crop_size))
+        with gp.build(self.pipeline):
+            while True:
+                array_is_zero = True
+                # request one sample, all channels, plus crop dimensions
+                while array_is_zero:
+                    request = gp.BatchRequest()
+                    request[self.raw] = gp.ArraySpec(
+                        roi=gp.Roi(
+                            (0,) * self.num_dims,
+                            # (1, self.num_channels, *self.crop_size),
+                            (2, self.num_channels, *self.temp_crop_size),
+                        )
+                    )
+
+                    sample = self.pipeline.request_batch(request)
+                    sample_data = sample[self.raw].data
+                    if np.max(sample_data) <= 0.0:
+                        pass
+                    else:
+                        array_is_zero = False
+                        anchor_samples, reference_samples = self.sample_coordinates()
+                        if np.random.rand() <= self.p_translation:
+                            # print('translation')
+                            sample_data = sample_data[0:1,:]
+                            translation = (np.random.randint(-pad_size, pad_size),
+                                           np.random.randint(-pad_size, pad_size))
+                            # translation = (0,
+                            #                0)
+                            translation = np.array(translation)
+                            translated_sample_data = sample_data[:,
+                                                                :,
+                                                                pad_size+translation[0]:pad_size+self.crop_size[0]+translation[0],
+                                                                pad_size+translation[1]:pad_size+self.crop_size[1]+translation[1]]
+                            cropped_sample_data = sample_data[:,
+                                                            :,
+                                                            pad_size:pad_size+self.crop_size[0],
+                                                            pad_size:pad_size+self.crop_size[1]]
+                            sample_data = np.concatenate((cropped_sample_data, translated_sample_data), axis=0)
+                        else:
+                            # print('no translation')
+                            # just crop padding
+                            sample_data = sample_data[:,:,pad_size:-pad_size,
+                                                          pad_size:-pad_size]
+                            translation = (0,0)
+                            translation = np.array(translation)
+                yield sample_data, anchor_samples, reference_samples, translation
 
     def __read_meta_data(self):
         meta_data = DatasetMetaData.from_dataset_config(self.dataset_config)

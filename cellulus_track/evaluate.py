@@ -2,8 +2,8 @@ import numpy as np
 import zarr
 from tqdm import tqdm
 
-from cellulus.configs.inference_config import InferenceConfig
-from cellulus.datasets.meta_data import DatasetMetaData
+from cellulus_track.configs.inference_config import InferenceConfig
+from cellulus_track.datasets.meta_data import DatasetMetaData
 
 
 def evaluate(inference_config: InferenceConfig) -> None:

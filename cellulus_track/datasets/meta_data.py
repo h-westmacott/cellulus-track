@@ -2,7 +2,7 @@ from typing import Tuple
 
 import zarr
 
-from cellulus.configs import DatasetConfig
+from cellulus_track.configs import DatasetConfig
 
 
 class DatasetMetaData:

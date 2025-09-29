@@ -88,6 +88,7 @@ class AnchorMeanshift:
         elif embedding.ndim == 4:
             c, d, h, w = embedding.shape
             if mask is not None:
+                
                 assert len(mask.shape) == 3
                 if mask.sum() == 0:
                     return -1 * np.ones(mask.shape, dtype=np.int32)

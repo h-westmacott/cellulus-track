@@ -1,9 +1,9 @@
 import click
 import tomli
 
-from cellulus.configs import ExperimentConfig
-from cellulus.infer import infer as infer_experiment
-from cellulus.train import train as train_experiment
+from cellulus_track.configs import ExperimentConfig
+from cellulus_track.infer import infer as infer_experiment
+from cellulus_track.train import train as train_experiment
 
 
 @click.command()

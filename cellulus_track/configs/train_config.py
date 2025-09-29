@@ -125,3 +125,7 @@ class TrainConfig:
     control_point_spacing: int = attrs.field(default=64, validator=instance_of(int))
     control_point_jitter: float = attrs.field(default=2.0, validator=instance_of(float))
     device: str = attrs.field(default="cuda:0", validator=instance_of(str))
+    train_seg_head: bool = attrs.field(default=True, validator=instance_of(bool))
+    train_velocity_head: bool = attrs.field(default=False, validator=instance_of(bool))
+    use_pretrained_model: bool = attrs.field(default=False, validator=instance_of(bool))
+    pretrained_model_path: str = attrs.field(default="", validator=instance_of(str))
