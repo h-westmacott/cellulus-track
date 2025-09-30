@@ -1,4 +1,4 @@
-<h2 align="center">Cellulus</h2>
+<h2 align="center">Cellulus-track</h2>
 
 - **[Introduction](#introduction)**
 - **[Installation](#installation)**
@@ -8,24 +8,22 @@
 
 
 ### Introduction
-This repository hosts the version of the code used for the **[preprint](https://arxiv.org/pdf/2310.08501.pdf)** titled **Unsupervised Learning of *Object-Centric Embeddings* for Cell Instance Segmentation in Microscopy Images**. This work was accepted to the International Conference for Computer Vision (ICCV), 2023.
-
-We refer to the proposed techniques described in the preprint as **Cellulus** - Cellulus is a deep learning based method which can be used to obtain instance-segmentation of objects in 2D or 3D microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training.
+Cellulus-track is a deep learning based method which can be used to obtain instance-segmentation and tracking of objects in 2D or 3D microscopy images in an unsupervised fashion i.e. requiring no ground truth labels during training.
 
 ### Installation
 
 One could execute these lines of code below to create a new environment and install dependencies.
 
-1. Create a new environment called `cellulus`:
+1. Create a new environment called `cellulus-track`:
 
 ```bash
-conda create -y -n cellulus python==3.9
+conda create -y -n cellulus-track python==3.9
 ```
 
 2. Activate the newly-created environment:
 
 ```
-conda activate cellulus
+conda activate cellulus-track
 ```
 
 3a. If using a GPU, install pytorch cuda dependencies:
@@ -43,11 +41,11 @@ pip install torch torchvision
 4. Install the package from github:
 
 ```bash
-pip install git+https://github.com/funkelab/cellulus.git
+pip install git+https://github.com/h-westmacott/cellulus-track
 ```
 
 
-### Getting Started
+<!-- ### Getting Started
 
 #### With Jupyter Notebooks
 
@@ -133,4 +131,4 @@ If you find our work useful in your research, please consider citing:
 
 ### Issues
 
-If you encounter any problems, please **[file an issue](https://github.com/funkelab/cellulus/issues)** along with a description.
+If you encounter any problems, please **[file an issue](https://github.com/funkelab/cellulus/issues)** along with a description. -->
