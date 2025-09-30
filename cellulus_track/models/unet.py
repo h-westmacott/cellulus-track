@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import torch
 import torch.nn as nn
-from funlib.learn.torch.models import UNet
+from cellulus_track.funlib import UNet
 from cellulus_track.models.Conv4d import Conv4d
 import numpy as np
 
