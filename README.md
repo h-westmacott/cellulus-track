@@ -1,10 +1,10 @@
 <h2 align="center">Cellulus-track</h2>
 
-- **[Introduction](#introduction)**
+<!-- - **[Introduction](#introduction)**
 - **[Installation](#installation)**
 - **[Getting Started](#getting-started)**
 - **[Citation](#citation)**
-- **[Issues](#issues)**
+- **[Issues](#issues)** -->
 
 
 ### Introduction
