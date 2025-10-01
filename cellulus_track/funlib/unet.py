@@ -2,8 +2,8 @@ from .conv4d import Conv4d
 import math
 import torch
 import torch.nn as nn
-from cellulus.models.MaxPool4d import MaxPooling4d
-from cellulus.models.upsample_4d_nearest import Upsample4DNearest
+from cellulus_track.models.MaxPool4d import MaxPooling4d
+from cellulus_track.models.upsample_4d_nearest import Upsample4DNearest
 
 
 class ConvPass(torch.nn.Module):
