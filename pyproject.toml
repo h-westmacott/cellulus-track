@@ -6,14 +6,14 @@ build-backend = "hatchling.build"
 
 # https://peps.python.org/pep-0621/
 [project]
-name = "cellulus"
+name = "cellulus-track"
 description = "Unsupervised Segmentation of Cells in Microscopy Images"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [
+    { name = "Henry Westmacott", email = "henryjw@mrc-lmb.cam.ac.uk" },
     { name = "Steffen Wolf", email = "steffenjwolf@gmail.com" },
     { name = "Manan Lalit", email = "lalitm@janelia.hhmi.org" },
-    { name = "Henry Westmacott", email = "henryjw@mrc-lmb.cam.ac.uk" },
     { name = "Jan Funke", email = "funkej@janelia.hhmi.org" },
 ]
 dynamic = ["version"]
@@ -52,7 +52,7 @@ infer = "cellulus.cli:infer"
 
 # https://hatch.pypa.io/latest/version/
 [tool.hatch.version]
-path = "cellulus/__init__.py"
+path = "cellulus_track/__init__.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -79,7 +79,7 @@ exclude_lines = [
 ]
 
 [tool.mypy]
-files = "cellulus"
+files = "cellulus_track"
 strict = true
 allow_untyped_defs = true
 allow_untyped_calls = true
