@@ -37,6 +37,12 @@ conda install pytorch==2.0.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c
 ```bash
 pip install torch torchvision
 ```
+I recommend using the mamba solver for installing pytorch cuda dependencies, to reduce the likelyhood of a very slow (24hr+) dependency resolve:
+
+```bash
+conda install conda-libmamba-solver
+conda config --set solver libmamba
+```
 
 4. Install the package from github:
 
