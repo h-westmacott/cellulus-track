@@ -36,7 +36,8 @@ conda config --set solver libmamba
 then install dependencies:
 
 ```bash
-conda install pytorch==2.0.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
+# conda install pytorch==2.2.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
+pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 ```
 
 3b. otherwise (if using a CPU or MPS), run:
