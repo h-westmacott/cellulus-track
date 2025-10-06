@@ -34,12 +34,14 @@ conda install conda-libmamba-solver
 conda config --set solver libmamba
 ```
 then install dependencies:
-
+(better on linux:)
 ```bash
-# conda install pytorch==2.2.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
+conda install pytorch==2.0.1 torchvision==0.15.2 pytorch-cuda=11.7 -c pytorch -c nvidia
+```
+(better on windows:)
+```bash
 pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 ```
-
 3b. otherwise (if using a CPU or MPS), run:
 
 ```bash
@@ -50,6 +52,12 @@ pip install torch torchvision
 
 ```bash
 pip install git+https://github.com/h-westmacott/cellulus-track
+```
+
+5. If that isn't working, for example it's throwing a `undefined symbol: iJIT_IsProfilingActive` error:
+
+```bash
+pip install torch==2.0.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
 ```
 
 
