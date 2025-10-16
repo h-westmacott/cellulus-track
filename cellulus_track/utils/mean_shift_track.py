@@ -101,6 +101,8 @@ class AnchorMeanshift:
         self.reduction_probability = reduction_probability
 
     def fit_mean_shift(self, X):
+        if X is None:
+            return None
         if self.reduction_probability < 1.0:
             X_reduced = X[np.random.rand(len(X)) < self.reduction_probability]
             mean_shift_segmentation = self.mean_shift.fit(X_reduced)
@@ -112,6 +114,8 @@ class AnchorMeanshift:
         return mean_shift_segmentation
     
     def compute_mean_shift(self, X):
+        if X is None:
+            return None
 
         mean_shift_segmentation = self.mean_shift.predict(X)
 
@@ -133,7 +137,9 @@ class AnchorMeanshift:
                 
                 assert len(mask.shape) == 3
                 if mask.sum() == 0:
-                    return -1 * np.ones(mask.shape, dtype=np.int32)
+                    # return -1 * np.ones(mask.shape, dtype=np.int32)
+                    # return -1 * np.ones((d * h * w, c), dtype=np.int32)
+                    return None
                 reshaped_embedding = embedding.permute(1, 2, 3, 0)[mask].view(-1, c)
             else:
                 reshaped_embedding = embedding.permute(1, 2, 3, 0).view(d * h * w, c)
@@ -143,7 +149,8 @@ class AnchorMeanshift:
     def spatialize_mean_shift_segmentation(self, mean_shift_segmentation, mask=None, embedding_shape=None):
         if mask is not None:
             mean_shift_segmentation_spatial = -1 * np.ones(mask.shape, dtype=np.int32)
-            mean_shift_segmentation_spatial[mask] = mean_shift_segmentation
+            if mask.sum() > 0:
+                mean_shift_segmentation_spatial[mask] = mean_shift_segmentation
             return mean_shift_segmentation_spatial
         else:
             if embedding_shape is not None:

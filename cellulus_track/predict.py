@@ -285,10 +285,10 @@ class my_predict(gp.torch.Predict):
 
         with torch.no_grad():
             out = self.model.forward(**inputs)
-            print(out.shape)
+            # print(out.shape)
         # downsampled_shape = [out.shape[:3] , torch.Size(np.ceil(out.shape[4]/self.anisotropy_factor)) , out.shape[5:]]
         downsampled_shape = torch.Size((int(np.ceil(out.shape[3]/self.anisotropy_factor)),)) + out.shape[4:]
-        print(downsampled_shape)
+        # print(downsampled_shape)
         # out = torch.nn.functional.interpolate(out,size=self.output_size)
         out = torch.nn.functional.interpolate(out[0],size=downsampled_shape)
         # out = torch.concat((out[0],out[1]),dim=1)
